@@ -114,8 +114,8 @@ import java.awt.event.KeyEvent;
      }
                                                         
      /******************************************************************/
-
-     public int getTop() {
+     
+     private int getTop() {
          return (int) getSize().getHeight() - BOARD_HEIGHT * squareHeight();
      }
      
@@ -132,7 +132,7 @@ import java.awt.event.KeyEvent;
      
      /******************************************************************/
 
-     public void doDrawing(Graphics g) {
+     private void doDrawing(Graphics g) {
          if(over) gameOver();
 
          drawSquares(g);
@@ -172,7 +172,7 @@ import java.awt.event.KeyEvent;
 
      /******************************************************************/
      
-     public void update() {
+     private void update() {
          if(paused) return;
          ticks +=1;
          points+=1*level;
@@ -203,7 +203,7 @@ import java.awt.event.KeyEvent;
 
      /******************************************************************/
 
-     public void pause() {
+     private void pause() {
          paused = !paused;
          if(paused) footer.setText("Paused " + getFooterMessage());
          else footer.setText(getFooterMessage());
