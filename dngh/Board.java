@@ -12,19 +12,16 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
  class Board extends JPanel {
+     enum Tile { EMPTY, PLAYER, STONE };
      private enum Direction { UP, DOWN, LEFT, RIGHT };
-     
-     private final int EMPTY   = 0;
-     private final int PLAYER  = 1;
-     private final int STONE   = 2;
-     private final int BOARD_WIDTH  = 30;
-     private final int BOARD_HEIGHT = 30;
-     private final int INTERVAL     = 400;
-     private final int BASIC_SPAWN_CHANCE  = 1;
-     
-     private int[][] board;
 
-     private Color playerColor;
+     static  final int SQUARE_LEN = 30;
+     private static final int BOARD_WIDTH  = 20;
+     private static final int BOARD_HEIGHT = 30;
+     private static final int INTERVAL     = 400;
+     private static final int BASIC_SPAWN_CHANCE  = 1;
+     
+     private Tile[][] board;
      private Color stoneColor;
 
      private boolean over; 
@@ -35,8 +32,9 @@ import java.awt.event.KeyEvent;
      private int ticks;
      private int points;
      private JLabel footer;
-     private int px;
-     private int py;
+     private BoardObject player;
+     private BoardObject asteroid;
+     private BoardObject background;
 
      /******************************************************************/
      
@@ -51,35 +49,30 @@ import java.awt.event.KeyEvent;
      
      
      private void initBoard(){
-         board = new  int[BOARD_WIDTH][BOARD_HEIGHT];
-         px = BOARD_WIDTH/2;
-         py = BOARD_HEIGHT/2;
-         board[py][px]= PLAYER;
-         playerColor = new Color(100, 100, 200);
-         stoneColor = Color.black;
+         board = new  Tile[BOARD_HEIGHT][BOARD_WIDTH];
+         player = new BoardObject( BOARD_WIDTH/2,BOARD_HEIGHT/2,
+                                   "dngh/images/fairydust.png", Tile.PLAYER);
 
+         asteroid = new BoardObject(0,0,"dngh/images/asteroid.png", Tile.STONE);
+         background = new BoardObject(0,0,"dngh/images/bg.jpg", Tile.EMPTY);
+
+         stoneColor = Color.black;
+         
          addKeyListener(new Controls());
          footer.setText(getFooterMessage());
          setFocusable(true);
      }
      
-     
-     /******************************************************************/
-     
-    private int squareWidth() {
-        return (int) getSize().getWidth() / BOARD_WIDTH;
-    }
-
      /******************************************************************/
 
-     private int squareHeight() {
-         return (int) getSize().getHeight() / BOARD_HEIGHT;
+
+     public static boolean isOnBoard(int x, int y) {
+         return !(x<0 ||  x >= BOARD_WIDTH || y < 0
+                  ||  y >= BOARD_HEIGHT);
      }
-    
 
      /******************************************************************/
      
-
    @Override
    public void paintComponent(Graphics g) {
        super.paintComponent(g);
@@ -87,14 +80,25 @@ import java.awt.event.KeyEvent;
    }
 
      /******************************************************************/
+
+    private void drawBoardObject(Graphics g, BoardObject bo) {
+        g.drawImage(bo.img, bo.x*SQUARE_LEN, bo.y*SQUARE_LEN, null);
+        for(int i=bo.x; i< bo.x+bo.getWidth();i++)
+            for(int j=bo.y; j< bo.y+bo.getHeight();j++) 
+                board[j][i]  = bo.tile;
+    }
+
+
+     /******************************************************************/
+    
      
      private void  drawGrid(Graphics g) {
          var size = getSize();
         for (int i = 0; i <= BOARD_HEIGHT; i++) {
-            int y= i * squareHeight();
+            int y= i * SQUARE_LEN;
             for (int j = 0; j <= BOARD_WIDTH; j++) {
-                int x= j * squareWidth();                
-                g.drawRect(x, getTop()+y, squareWidth(), squareHeight());
+                int x= j * SQUARE_LEN;                
+                g.drawRect(x, getTop()+y, SQUARE_LEN, SQUARE_LEN);
             }
         }
      }
@@ -103,10 +107,10 @@ import java.awt.event.KeyEvent;
      /******************************************************************/
      
      private void drawSquare(Graphics g, int x, int y, Color c) {
-          x= x * squareHeight() + 1;
-          y= y * squareHeight() + 1 + getTop(); 
-          int a = squareWidth()-1;
-          int b = squareHeight() - 1;
+          x= x * SQUARE_LEN + 1;
+          y= y * SQUARE_LEN + 1 + getTop(); 
+          int a = SQUARE_LEN -1;
+          int b = SQUARE_LEN - 1;
           Color t = g.getColor();
           g.setColor(c);
           g.fillRect(x,y, a,b);
@@ -116,27 +120,27 @@ import java.awt.event.KeyEvent;
      /******************************************************************/
      
      private int getTop() {
-         return (int) getSize().getHeight() - BOARD_HEIGHT * squareHeight();
+         return (int) getSize().getHeight() - BOARD_HEIGHT * SQUARE_LEN;
      }
      
      
      /******************************************************************/
 
-     private void drawSquares(Graphics g) {
+     private void drawAsteroids(Graphics g) {
          for (int i = 0; i < BOARD_HEIGHT; i++)
              for (int j = 0; j < BOARD_WIDTH; j++)
-                 if(board[j][i]==STONE) drawSquare(g, i, j, stoneColor);
-                 else  drawSquare(g, i, j, Color.white);
-         drawSquare(g, px, py, playerColor);
+                 if(board[i][j]==Tile.STONE) 
+                     g.drawImage(asteroid.img, j*SQUARE_LEN, i*SQUARE_LEN, null);
      }
      
      /******************************************************************/
 
      private void doDrawing(Graphics g) {
          if(over) gameOver();
-
-         drawSquares(g);
-         drawGrid(g);
+         g.drawImage(background.img, 0, 0, null);
+         drawAsteroids(g);
+         drawBoardObject(g,player);
+         //drawGrid(g);
      }
      /******************************************************************/
 
@@ -157,15 +161,15 @@ import java.awt.event.KeyEvent;
 
      private void fallingStones() {
          for(int i=0; i < BOARD_WIDTH; i++) 
-             if( board[BOARD_HEIGHT-1][i] == STONE)
-                 board[BOARD_HEIGHT-1][i] = EMPTY;
+             if( board[BOARD_HEIGHT-1][i] == Tile.STONE)
+                 board[BOARD_HEIGHT-1][i] = Tile.EMPTY;
          
          
          for(int i=0; i < BOARD_WIDTH; i++) 
              for(int j=BOARD_HEIGHT-2; j >= 0; j--) 
-                 if (board[j][i] == STONE) {
-                     board[j][i] = EMPTY;
-                     board[j+1][i] = STONE;
+                 if (board[j][i] == Tile.STONE) {
+                     board[j][i] = Tile.EMPTY;
+                     board[j+1][i] = Tile.STONE;
                  }
      }
      
@@ -181,7 +185,7 @@ import java.awt.event.KeyEvent;
               
          for(int i=0; i < BOARD_WIDTH; i++) {
              if (rand.nextInt(100) < (BASIC_SPAWN_CHANCE + level))
-                 board[0][i] = STONE;
+                 board[0][i] = Tile.STONE;
          }
          
          if(ticks==20*HEIGHT) {
@@ -191,7 +195,7 @@ import java.awt.event.KeyEvent;
          
          footer.setText(getFooterMessage());
 
-         if(board[py][px] == STONE) over = true;          
+         if(board[player.y][player.x] == Tile.STONE) over = true;          
      }
 
      /******************************************************************/
@@ -227,15 +231,19 @@ import java.awt.event.KeyEvent;
      /******************************************************************/
      
      private void move(Direction d) {
+         int py = player.y;
+         int px = player.x;
          if(over) return;
          switch (d) {
-         case DOWN  -> { if(py< (BOARD_HEIGHT-1))  board[py++][px] = EMPTY; }
-         case UP    -> { if(py > 0) board[py--][px] = EMPTY; }
-         case LEFT  -> { if(px > 0) board[py][px--] = EMPTY; }
-         case RIGHT -> { if(px < (BOARD_WIDTH-1)) board[py][px++] = EMPTY; }
+         case DOWN  -> { if(py< (BOARD_HEIGHT-1))  board[py++][px] = Tile.EMPTY; }
+         case UP    -> { if(py > 0) board[py--][px] = Tile.EMPTY; }
+         case LEFT  -> { if(px > 0) board[py][px--] = Tile.EMPTY; }
+         case RIGHT -> { if(px < (BOARD_WIDTH-1)) board[py][px++] = Tile.EMPTY; }
          }
-         if (board[py][px] == STONE) over = true;
-         board[py][px] = PLAYER;
+         if (board[py][px] == Tile.STONE) over = true;
+         board[py][px] = Tile.PLAYER;
+         player.x = px;
+         player.y = py;
          
      }
      

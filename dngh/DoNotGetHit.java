@@ -9,8 +9,8 @@ import javax.swing.BorderFactory;
 
 public class DoNotGetHit extends JFrame {
     private Board board;
-    private final int WIDTH=1000;
-    private final int HEIGHT=1000;
+    private final int WIDTH=600;
+    private final int HEIGHT=900;
 
     
     public DoNotGetHit() {

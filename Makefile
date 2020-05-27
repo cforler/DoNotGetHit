@@ -8,7 +8,7 @@ DoNotGetHit:
 
 
 DoNotGetHit.jar:
-	jar cfmv $@ Manifest $(DIR)/*.class
+	jar cfmv $@ Manifest $(DIR)/*.class $(DIR)/images/*
 
 
 run: DoNotGetHit.jar
