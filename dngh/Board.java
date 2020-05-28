@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
      private static final int BOARD_WIDTH  = 20;
      private static final int BOARD_HEIGHT = 30;
      private static final int INTERVAL     =  8;
-     private static final int BASIC_SPAWN_CHANCE  = 1;
+     private static final int BASIC_SPAWN_CHANCE  = 5;
      
      private Tile[][] board;
 
