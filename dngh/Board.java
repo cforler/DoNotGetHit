@@ -193,6 +193,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
                      board[0][i+1] = Tile.STONE;
                      board[1][i] = Tile.STONE;
                      board[1][i+1] = Tile.STONE;
+                     i+=1;
                  }
                  else asteroids.add(new Asteroid(i*SQUARE_LEN, 0));
                  board[0][i] = Tile.STONE;
