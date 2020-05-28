@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
      private static final int BOARD_HEIGHT = 30;
      private static final int INTERVAL     =  8;
      private static final int BASIC_SPAWN_CHANCE  = 5;
+     private static final int BIG_SPAWN_CHANCE    = 5;
      
      private Tile[][] board;
 
@@ -39,7 +40,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
      private BoardObject background;
 
      List <BoardObject> asteroids;
-     
+
      /******************************************************************/
      
      public Board(JLabel footer) {
@@ -166,17 +167,32 @@ import java.util.concurrent.CopyOnWriteArrayList;
                  else {
                      board[y-1][x] = Tile.EMPTY;
                      board[y][x] = Tile.STONE;
+                     
+                     if (a instanceof BigAsteroid) {
+                         board[y-1][x+1] = Tile.EMPTY;
+                         board[y][x+1]   = Tile.STONE;
+                         board[y+1][x]   = Tile.STONE;
+                         board[y+1][x+1] = Tile.STONE;
+                     }
                  }
              }
+             
          }
      }
-
+     
      /******************************************************************/
 
      public void spawnAsteroids() {
          for(int i=0; i < BOARD_WIDTH; i++) {
              if (rand.nextInt(100) < (BASIC_SPAWN_CHANCE + level)) {
-                 asteroids.add(new Asteroid(i*SQUARE_LEN, 0));
+                 if((i< BOARD_WIDTH-1) &&
+                    (rand.nextInt(100) < BIG_SPAWN_CHANCE)) {
+                     asteroids.add(new BigAsteroid(i*SQUARE_LEN, 0));
+                     board[0][i+1] = Tile.STONE;
+                     board[1][i] = Tile.STONE;
+                     board[1][i+1] = Tile.STONE;
+                 }
+                 else asteroids.add(new Asteroid(i*SQUARE_LEN, 0));
                  board[0][i] = Tile.STONE;
              }
          }
