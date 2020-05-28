@@ -1,7 +1,6 @@
 # Don't get Hit
 
-This is a simple swing based game. The ultimate goal of this game is
-stated clearly in it's name: **Don't get Hit** by an asteroid at all cost.
+The ultimate goal of this game is stated clearly in it's name: **Don't get Hit** by an asteroid at all cost.
 
 ![Schreenshot](screenshot.png)
 
