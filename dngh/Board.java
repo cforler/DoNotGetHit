@@ -256,6 +256,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
      /******************************************************************/
      
      private void move(Direction d) {
+         if(paused) return;
          int py = player.y;
          int px = player.x;
          if(over) return;
