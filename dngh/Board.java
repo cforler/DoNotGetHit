@@ -11,6 +11,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+        
  class Board extends JPanel {
      enum Tile { EMPTY, PLAYER, STONE };
      private enum Direction { UP, DOWN, LEFT, RIGHT };
@@ -18,7 +21,7 @@ import javax.swing.JOptionPane;
      static  final int SQUARE_LEN = 30;
      private static final int BOARD_WIDTH  = 20;
      private static final int BOARD_HEIGHT = 30;
-     private static final int INTERVAL     = 200;
+     private static final int INTERVAL     =  8;
      private static final int BASIC_SPAWN_CHANCE  = 1;
      
      private Tile[][] board;
@@ -32,16 +35,16 @@ import javax.swing.JOptionPane;
      private int points;
      private JLabel footer;
      private BoardObject player;
-     private BoardObject asteroid;
      private BoardObject explosion;
      private BoardObject background;
+
+     List <BoardObject> asteroids;
      
      /******************************************************************/
      
      public Board(JLabel footer) {
          rand = new Random();
          this.footer = footer;
-         asteroid = new BoardObject(0,0,"dngh/images/asteroid.png", Tile.STONE);
          explosion = new BoardObject(0,0,"dngh/images/explosion.png",
                                      Tile.PLAYER);
              
@@ -60,14 +63,13 @@ import javax.swing.JOptionPane;
          board = new  Tile[BOARD_HEIGHT][BOARD_WIDTH];
          player = new BoardObject( BOARD_WIDTH/2,BOARD_HEIGHT/2,
                                    "dngh/images/fairydust.png", Tile.PLAYER);
-
+         asteroids = new CopyOnWriteArrayList<BoardObject>();
          footer.setText(getFooterMessage());
          setFocusable(true);
          start();
      }
      
      /******************************************************************/
-
 
      public static boolean isOnBoard(int x, int y) {
          return !(x<0 ||  x >= BOARD_WIDTH || y < 0
@@ -117,11 +119,8 @@ import javax.swing.JOptionPane;
      /******************************************************************/
 
      private void drawAsteroids(Graphics g) {
-         for (int i = 0; i < BOARD_HEIGHT; i++)
-             for (int j = 0; j < BOARD_WIDTH; j++)
-                 if(board[i][j]==Tile.STONE) 
-                     g.drawImage(asteroid.img,
-                                 j*SQUARE_LEN, i*SQUARE_LEN, null);
+         for(BoardObject a : asteroids) 
+             g.drawImage(a.img, a.x, a.y, null);
      }
      
      /******************************************************************/
@@ -158,38 +157,46 @@ import javax.swing.JOptionPane;
      /******************************************************************/
 
      private void fallingStones() {
-         for(int i=0; i < BOARD_WIDTH; i++) 
-             if( board[BOARD_HEIGHT-1][i] == Tile.STONE)
-                 board[BOARD_HEIGHT-1][i] = Tile.EMPTY;
-         
-         
-         for(int i=0; i < BOARD_WIDTH; i++) 
-             for(int j=BOARD_HEIGHT-2; j >= 0; j--) 
-                 if (board[j][i] == Tile.STONE) {
-                     board[j][i] = Tile.EMPTY;
-                     board[j+1][i] = Tile.STONE;
+         for(BoardObject a : asteroids) {
+             a.y +=1;
+             if( (a.y%SQUARE_LEN)==0) {
+                 int x = a.x/SQUARE_LEN;
+                 int y = a.y/SQUARE_LEN;
+                 if(y>BOARD_HEIGHT-1) asteroids.remove(a);
+                 else {
+                     board[y-1][x] = Tile.EMPTY;
+                     board[y][x] = Tile.STONE;
                  }
+             }
+         }
      }
-     
 
+     /******************************************************************/
+
+     public void spawnAsteroids() {
+         for(int i=0; i < BOARD_WIDTH; i++) {
+             if (rand.nextInt(100) < (BASIC_SPAWN_CHANCE + level)) {
+                 asteroids.add(new Asteroid(i*SQUARE_LEN, 0));
+                 board[0][i] = Tile.STONE;
+             }
+         }
+     }
+
+     
      /******************************************************************/
      
      private void update() {
          if(paused || over) return;
          ticks +=1;
-         points+=1*level;
+
          fallingStones();
-            
-              
-         for(int i=0; i < BOARD_WIDTH; i++) {
-             if (rand.nextInt(100) < (BASIC_SPAWN_CHANCE + level))
-                 board[0][i] = Tile.STONE;
+
+         if((ticks%100)==0) {
+             points+=1*level;
+             spawnAsteroids();
          }
          
-         if(ticks==20*HEIGHT) {
-             level+=1;
-             ticks=0;
-         }
+         if((ticks % (1000*HEIGHT)) == 0)  level+=1;
          
          footer.setText(getFooterMessage());
 

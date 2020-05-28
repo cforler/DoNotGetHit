@@ -17,11 +17,6 @@ public class BoardObject {
 
 
     public BoardObject(int x, int y, String filename, Board.Tile tile) {
-        if (Board.isOnBoard(x,y)==false) {
-            String msg = "" + this.getClass().getSimpleName() +
-                ": Invalid coordinate: " + "(" + x +","+y+")" ;
-            throw new InvalidParameterException(msg);
-        }
         this.x = x;
         this.y = y;
         this.tile = tile;
