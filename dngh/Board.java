@@ -261,10 +261,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
          int px = player.x;
          if(over) return;
          switch (d) {
-         case DOWN  -> { if(py< (BOARD_HEIGHT-2))  board[py++][px] = Tile.EMPTY; }
-         case UP    -> { if(py > 0) board[py--][px] = Tile.EMPTY; }
-         case LEFT  -> { if(px > 0) board[py][px--] = Tile.EMPTY; }
-         case RIGHT -> { if(px < (BOARD_WIDTH-1)) board[py][px++] = Tile.EMPTY; }
+         case DOWN: if(py< (BOARD_HEIGHT-2)) board[py++][px] = Tile.EMPTY; break;
+         case UP:   if(py > 0) board[py--][px] = Tile.EMPTY; break;
+         case LEFT:  if(px > 0) board[py][px--] = Tile.EMPTY; break;
+         case RIGHT: if(px < (BOARD_WIDTH-1)) board[py][px++] = Tile.EMPTY; break;
          }
          if (board[py][px] == Tile.STONE) over = true;
          board[py][px] = Tile.PLAYER;
@@ -277,17 +277,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
          @Override
          public void keyPressed(KeyEvent e) {
              switch (e.getKeyCode()) {
-             case KeyEvent.VK_P -> pause();
-             case KeyEvent.VK_SPACE -> pause();
-             case KeyEvent.VK_UP    -> move(Direction.UP);
-             case KeyEvent.VK_DOWN  -> move(Direction.DOWN);
-             case KeyEvent.VK_LEFT  -> move(Direction.LEFT);
-             case KeyEvent.VK_RIGHT -> move(Direction.RIGHT);
-
-             case KeyEvent.VK_W -> move(Direction.UP);
-             case KeyEvent.VK_S -> move(Direction.DOWN);
-             case KeyEvent.VK_A -> move(Direction.LEFT);
-             case KeyEvent.VK_D -> move(Direction.RIGHT);
+             case KeyEvent.VK_P: 
+             case KeyEvent.VK_SPACE: pause(); break;
+             case KeyEvent.VK_W:
+             case KeyEvent.VK_UP: move(Direction.UP); break;
+             case KeyEvent.VK_S:
+             case KeyEvent.VK_DOWN: move(Direction.DOWN); break;
+             case KeyEvent.VK_A:
+             case KeyEvent.VK_LEFT: move(Direction.LEFT); break;
+             case KeyEvent.VK_D:
+             case KeyEvent.VK_RIGHT: move(Direction.RIGHT); break;
              }
          }
      }
