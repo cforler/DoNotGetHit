@@ -15,13 +15,10 @@ public class DoNotGetHit extends JFrame {
     
     public DoNotGetHit() {
         JLabel footer = new JLabel();
-        add(footer, BorderLayout.SOUTH);
-        
+        add(footer, BorderLayout.SOUTH);      
         board = new Board(footer);
         board.setBorder(BorderFactory.createLineBorder(Color.black));
         add(board, BorderLayout.CENTER);
-        board.start();
-        
         setTitle("Don't get hit");
         setSize(WIDTH+2, HEIGHT+40);
         setDefaultCloseOperation(EXIT_ON_CLOSE);

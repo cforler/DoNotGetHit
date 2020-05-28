@@ -4,12 +4,12 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.awt.Graphics;
 import java.util.Random;
-import java.awt.Color;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.JOptionPane;
 
  class Board extends JPanel {
      enum Tile { EMPTY, PLAYER, STONE };
@@ -22,7 +22,6 @@ import java.awt.event.KeyEvent;
      private static final int BASIC_SPAWN_CHANCE  = 1;
      
      private Tile[][] board;
-     private Color stoneColor;
 
      private boolean over; 
      private boolean paused;
@@ -34,33 +33,37 @@ import java.awt.event.KeyEvent;
      private JLabel footer;
      private BoardObject player;
      private BoardObject asteroid;
+     private BoardObject explosion;
      private BoardObject background;
-
+     
      /******************************************************************/
      
      public Board(JLabel footer) {
          rand = new Random();
          this.footer = footer;
-         over=false;
-         paused=false;
-         level=1;
+         asteroid = new BoardObject(0,0,"dngh/images/asteroid.png", Tile.STONE);
+         explosion = new BoardObject(0,0,"dngh/images/explosion.png",
+                                     Tile.PLAYER);
+             
+         background = new BoardObject(0,0,"dngh/images/bg.jpg", Tile.EMPTY);
+         addKeyListener(new Controls());
+         timer = new Timer(INTERVAL, new Ticks());
          initBoard();
      }
      
      
      private void initBoard(){
+         over=false;
+         paused=false;
+         level=1;
+         points=0;
          board = new  Tile[BOARD_HEIGHT][BOARD_WIDTH];
          player = new BoardObject( BOARD_WIDTH/2,BOARD_HEIGHT/2,
                                    "dngh/images/fairydust.png", Tile.PLAYER);
 
-         asteroid = new BoardObject(0,0,"dngh/images/asteroid.png", Tile.STONE);
-         background = new BoardObject(0,0,"dngh/images/bg.jpg", Tile.EMPTY);
-
-         stoneColor = Color.black;
-         
-         addKeyListener(new Controls());
          footer.setText(getFooterMessage());
          setFocusable(true);
+         start();
      }
      
      /******************************************************************/
@@ -106,19 +109,6 @@ import java.awt.event.KeyEvent;
 
      /******************************************************************/
      
-     private void drawSquare(Graphics g, int x, int y, Color c) {
-          x= x * SQUARE_LEN + 1;
-          y= y * SQUARE_LEN + 1 + getTop(); 
-          int a = SQUARE_LEN -1;
-          int b = SQUARE_LEN - 1;
-          Color t = g.getColor();
-          g.setColor(c);
-          g.fillRect(x,y, a,b);
-          g.setColor(t);
-     }
-                                                        
-     /******************************************************************/
-     
      private int getTop() {
          return (int) getSize().getHeight() - BOARD_HEIGHT * SQUARE_LEN;
      }
@@ -130,22 +120,25 @@ import java.awt.event.KeyEvent;
          for (int i = 0; i < BOARD_HEIGHT; i++)
              for (int j = 0; j < BOARD_WIDTH; j++)
                  if(board[i][j]==Tile.STONE) 
-                     g.drawImage(asteroid.img, j*SQUARE_LEN, i*SQUARE_LEN, null);
+                     g.drawImage(asteroid.img,
+                                 j*SQUARE_LEN, i*SQUARE_LEN, null);
      }
      
      /******************************************************************/
 
      private void doDrawing(Graphics g) {
-         if(over) gameOver();
          g.drawImage(background.img, 0, 0, null);
          drawAsteroids(g);
-         drawBoardObject(g,player);
-         //drawGrid(g);
+         if(over) {
+             explosion.x = player.x;
+             explosion.y = player.y;
+             drawBoardObject(g,explosion);
+         }
+         else drawBoardObject(g,player);
      }
      /******************************************************************/
 
      public void start() {
-        timer = new Timer(INTERVAL, new Ticks());
         timer.start();
     }
      
@@ -153,7 +146,12 @@ import java.awt.event.KeyEvent;
 
      private void gameOver() {
          timer.stop();
-         footer.setText("GAME OVER!" + getFooterMessage());
+         footer.setText("GAME OVER! " + getFooterMessage());
+         JOptionPane.showMessageDialog(null, "GAME OVER!\n"+"Your score: "
+                                       +points  ,"YOU GOT HIT",
+                                       JOptionPane.WARNING_MESSAGE);
+         initBoard();
+         start();
      }
      
 
@@ -177,7 +175,7 @@ import java.awt.event.KeyEvent;
      /******************************************************************/
      
      private void update() {
-         if(paused) return;
+         if(paused || over) return;
          ticks +=1;
          points+=1*level;
          fallingStones();
@@ -225,6 +223,7 @@ import java.awt.event.KeyEvent;
      private void tick() {
          update();
          repaint();
+         if(over) gameOver();
      }
 
 
