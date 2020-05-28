@@ -18,7 +18,7 @@ import javax.swing.JOptionPane;
      static  final int SQUARE_LEN = 30;
      private static final int BOARD_WIDTH  = 20;
      private static final int BOARD_HEIGHT = 30;
-     private static final int INTERVAL     = 400;
+     private static final int INTERVAL     = 200;
      private static final int BASIC_SPAWN_CHANCE  = 1;
      
      private Tile[][] board;
@@ -234,7 +234,7 @@ import javax.swing.JOptionPane;
          int px = player.x;
          if(over) return;
          switch (d) {
-         case DOWN  -> { if(py< (BOARD_HEIGHT-1))  board[py++][px] = Tile.EMPTY; }
+         case DOWN  -> { if(py< (BOARD_HEIGHT-2))  board[py++][px] = Tile.EMPTY; }
          case UP    -> { if(py > 0) board[py--][px] = Tile.EMPTY; }
          case LEFT  -> { if(px > 0) board[py][px--] = Tile.EMPTY; }
          case RIGHT -> { if(px < (BOARD_WIDTH-1)) board[py][px++] = Tile.EMPTY; }
