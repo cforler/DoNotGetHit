@@ -171,8 +171,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
                      if (a instanceof BigAsteroid) {
                          board[y-1][x+1] = Tile.EMPTY;
                          board[y][x+1]   = Tile.STONE;
+                         if(y < BOARD_HEIGHT-1) {
                          board[y+1][x]   = Tile.STONE;
                          board[y+1][x+1] = Tile.STONE;
+                         }
                      }
                  }
              }
