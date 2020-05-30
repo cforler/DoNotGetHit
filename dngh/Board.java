@@ -7,8 +7,6 @@ import java.util.Random;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
 import java.util.List;
@@ -16,26 +14,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
         
  class Board extends JPanel {
      enum Tile { EMPTY, PLAYER, STONE };
-     private enum Direction { UP, DOWN, LEFT, RIGHT };
 
-     static  final int SQUARE_LEN = 30;
-     private static final int BOARD_WIDTH  = 20;
-     private static final int BOARD_HEIGHT = 30;
+     static final int SQUARE_LEN = 30;
+     static final int BOARD_WIDTH  = 20;
+     static final int BOARD_HEIGHT = 30;
      private static final int INTERVAL     =  8;
      private static final int BASIC_SPAWN_CHANCE  = 5;
      private static final int BIG_SPAWN_CHANCE    = 5;
      
-     private Tile[][] board;
+     Tile[][] board;
 
-     private boolean over; 
-     private boolean paused;
+     boolean over; 
+     boolean paused;
+     BoardObject player;
+     JLabel footer;
+     
      private Random rand;
      private Timer timer;
      private int level;
      private int ticks;
      private int points;
-     private JLabel footer;
-     private BoardObject player;
+     
      private BoardObject explosion;
      private BoardObject background;
 
@@ -50,7 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
                                      Tile.PLAYER);
              
          background = new BoardObject(0,0,"dngh/images/bg.jpg", Tile.EMPTY);
-         addKeyListener(new Controls());
+         addKeyListener(new Controls(this));
          timer = new Timer(INTERVAL, new Ticks());
          initBoard();
      }
@@ -224,18 +223,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
      /******************************************************************/
 
-     private String getFooterMessage() {
+     String getFooterMessage() {
          return "Level: " + level +"   Score: " + points;
      }
      
-
-     /******************************************************************/
-
-     private void pause() {
-         paused = !paused;
-         if(paused) footer.setText("Paused " + getFooterMessage());
-         else footer.setText(getFooterMessage());
-    }
 
      /******************************************************************/
 
@@ -250,44 +241,5 @@ import java.util.concurrent.CopyOnWriteArrayList;
          update();
          repaint();
          if(over) gameOver();
-     }
-
-
-     /******************************************************************/
-     
-     private void move(Direction d) {
-         if(paused) return;
-         int py = player.y;
-         int px = player.x;
-         if(over) return;
-         switch (d) {
-         case DOWN: if(py< (BOARD_HEIGHT-2)) board[py++][px] = Tile.EMPTY; break;
-         case UP:   if(py > 0) board[py--][px] = Tile.EMPTY; break;
-         case LEFT:  if(px > 0) board[py][px--] = Tile.EMPTY; break;
-         case RIGHT: if(px < (BOARD_WIDTH-1)) board[py][px++] = Tile.EMPTY; break;
-         }
-         if (board[py][px] == Tile.STONE) over = true;
-         board[py][px] = Tile.PLAYER;
-         player.x = px;
-         player.y = py;
-         
-     }
-     
-     class Controls extends KeyAdapter {
-         @Override
-         public void keyPressed(KeyEvent e) {
-             switch (e.getKeyCode()) {
-             case KeyEvent.VK_P: 
-             case KeyEvent.VK_SPACE: pause(); break;
-             case KeyEvent.VK_W:
-             case KeyEvent.VK_UP: move(Direction.UP); break;
-             case KeyEvent.VK_S:
-             case KeyEvent.VK_DOWN: move(Direction.DOWN); break;
-             case KeyEvent.VK_A:
-             case KeyEvent.VK_LEFT: move(Direction.LEFT); break;
-             case KeyEvent.VK_D:
-             case KeyEvent.VK_RIGHT: move(Direction.RIGHT); break;
-             }
-         }
      }
  }

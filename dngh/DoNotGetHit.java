@@ -23,6 +23,7 @@ public class DoNotGetHit extends JFrame {
         setSize(WIDTH+2, HEIGHT+40);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false);
     }
 
 
