@@ -93,22 +93,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
                 board[j][i]  = bo.tile;
     }
 
-
-     /******************************************************************/
-    
-     
-     private void  drawGrid(Graphics g) {
-         var size = getSize();
-        for (int i = 0; i <= BOARD_HEIGHT; i++) {
-            int y= i * SQUARE_LEN;
-            for (int j = 0; j <= BOARD_WIDTH; j++) {
-                int x= j * SQUARE_LEN;                
-                g.drawRect(x, getTop()+y, SQUARE_LEN, SQUARE_LEN);
-            }
-        }
-     }
-
-
      /******************************************************************/
      
      private int getTop() {
