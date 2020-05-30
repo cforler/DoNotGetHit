@@ -150,7 +150,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
                                        +points  ,"YOU GOT HIT",
                                        JOptionPane.WARNING_MESSAGE);
          initBoard();
-         start();
      }
      
 
